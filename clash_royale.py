@@ -121,12 +121,12 @@ CARD = ((170, CY), (270, CY), (370, CY), (470, CY))  # 卡片坐标
 AXIS = {'左': 125, '右': 405, '上': 200, '下': 720}
 
 
-def random_play(power_empty=True):
+def random_play(power_empty=True, degrade=0):
     card_index = random.randint(0, 3)
     axis_x = random.choice(('左', '右'))
     axis_y = random.choice(('上', '下'))
     log.info(f"{CSS(f'战斗中', 'r')} | 卡片{card_index+1} | {axis_x}{axis_y}")
-    if power_empty:
+    if power_empty or degrade:
         countdown(random.randint(1, interval))
     click(*CARD[card_index])
     click(AXIS[axis_x], AXIS[axis_y])
@@ -152,7 +152,7 @@ def play_game(degrade=0):  # 寻找起点和终点坐标
             return 'quit'
 
     elif ui.战斗中():
-        random_play(power_empty=ui.能量未满())
+        random_play(power_empty=ui.能量未满(), degrade=degrade)
 
     elif ui.结束():
         click(270, 850, CSS('===== 结束 =====', 'b'), wait=3)
@@ -174,7 +174,8 @@ def play_game(degrade=0):  # 寻找起点和终点坐标
 def main(degrade=0):
     # degrade 是否为了降级
     global interval
-    interval = 30 if degrade else 1
+    interval = max(15, int(degrade)) if degrade else 1
+    print(f'{degrade = } | {interval = }')
 
     global d
     d = get_device()
@@ -187,7 +188,7 @@ def main(degrade=0):
     # 防出错自动重启
     while True:
         try:
-            r = play_game(degrade=0)
+            r = play_game(degrade=degrade)
             if r == 'quit':
                 return
         except Exception as e:
