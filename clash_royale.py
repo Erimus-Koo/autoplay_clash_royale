@@ -19,6 +19,7 @@ d = im_pixel = ''
 package_name = 'com.supercell.clashroyale'
 SHOW_CHECK_COLOR_LOG = 0  # 是否显示截图检查颜色的色值 debug用
 interval = 1
+mismatch_count = 0
 # ═══════════════════════════════════════════════
 
 
@@ -36,13 +37,12 @@ def screen_capture(save=0):
 
 def check_point(pos, color, tolerance=20, showLog=0):  # 棋子取色精确范围
     r, g, b = color
-    i = tolerance  # 近似范围
     src = im_pixel[tuple(pos)]
     if showLog:
         log.info(CSS(f'{pos} = {src}', 'lk'))
-    return ((r - i < src[0] < r + i)
-            and (g - i < src[1] < g + i)
-            and (b - i < src[2] < b + i))
+    return ((r - tolerance < src[0] < r + tolerance)
+            and (g - tolerance < src[1] < g + tolerance)
+            and (b - tolerance < src[2] < b + tolerance))
 
 
 def check_match(*conditionList, tolerance=20, showLog=SHOW_CHECK_COLOR_LOG):
@@ -108,8 +108,8 @@ class UI():
                            ([270, 925], [78, 175, 255]))    # 按钮
 
     def 重新登录(self):
-        return check_match(([70, 400], [66, 66, 66]),       # 左上
-                           ([470, 550], [66, 66, 66]))      # 右下
+        return check_match(([80, 410], [60, 60, 60]),       # 左上
+                           ([450, 540], [60, 60, 60]))      # 右下
 
 
 ui = UI()
@@ -136,6 +136,7 @@ def random_play(power_empty=True, degrade=0):
 
 
 def play_game(degrade=0):  # 寻找起点和终点坐标
+    global mismatch_count
 
     screen_capture()  # 获取截图
 
@@ -148,7 +149,8 @@ def play_game(degrade=0):  # 寻找起点和终点坐标
             click(270, 600, CSS('确认无金币', 'b'), wait=5)  # 继续游戏
         else:
             print('无法再获得金币 退出游戏')
-            kill_process('Nox')  # quit_emulator
+            # kill_process('Nox')  # quit_emulator
+            d.press('home')
             return 'quit'
 
     elif ui.战斗中():
@@ -161,11 +163,20 @@ def play_game(degrade=0):  # 寻找起点和终点坐标
         click(270, 920, '升降级', wait=3)
 
     elif ui.重新登录():
+        print(CSS('需要重新登陆'))
+        countdown(300)  # 给手机留出操作时间
         click(120, 525, '重新登录', wait=5)
 
     else:
-        log.info(CSS('截图不匹配任何模式', 'lk'))
+        mismatch_count += 1
+        log.info(CSS(f'截图不匹配任何模式 {mismatch_count}', 'lk'))
+        if mismatch_count > 20:
+            mismatch_count = 0
+            launch_app(d, package_name)
         countdown(3)
+        return
+
+    mismatch_count = 0
 
 
 # ═══════════════════════════════════════════════
@@ -174,7 +185,7 @@ def play_game(degrade=0):  # 寻找起点和终点坐标
 def main(degrade=0):
     # degrade 是否为了降级
     global interval
-    interval = max(15, int(degrade)) if degrade else 1
+    interval = degrade or interval
     print(f'{degrade = } | {interval = }')
 
     global d
