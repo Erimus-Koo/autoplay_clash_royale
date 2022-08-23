@@ -121,15 +121,21 @@ CARD = ((170, CY), (270, CY), (370, CY), (470, CY))  # 卡片坐标
 AXIS = {'左': 125, '右': 405, '上': 200, '下': 720}
 
 
-def random_play(power_empty=True, degrade=0):
+def random_play(power_empty=True, degrade=0, method=2):
     card_index = random.randint(0, 3)
-    axis_x = random.choice(('左', '右'))
-    axis_y = random.choice(('上', '下'))
-    log.info(f"{CSS(f'战斗中', 'r')} | 卡片{card_index+1} | {axis_x}{axis_y}")
-    if power_empty or degrade:
-        countdown(random.randint(1, interval))
+    if method == 1:
+        x = random.choice(('左', '右'))
+        y = random.choice(('上', '下'))
+    if method == 2:
+        x = random.randint(AXIS['左'], AXIS['右'])
+        y = random.randint(AXIS['上'], AXIS['下'])
+    log.info(f"{CSS(f'战斗中', 'r')} | 卡片{card_index+1} | {x},{y}")
+    if method == 1:
+        x, y = AXIS[x], AXIS[y]
     click(*CARD[card_index])
-    click(AXIS[axis_x], AXIS[axis_y])
+    click(x, y)
+    if power_empty or degrade:
+        countdown(random.randint(max(0, interval - 2), interval + 2))
 
 
 # ═══════════════════════════════════════════════
