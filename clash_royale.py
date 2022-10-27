@@ -75,7 +75,7 @@ class UI():
 
     def 开始对战(self):
         return check_match(([240, 600], [255, 185, 0]),     # 左黄
-                           ([300, 600], [0, 176, 255]))     # 右蓝
+                           ([270, 600], [255, 185, 0]))     # 中间黄
 
     def 确认无金币(self):
         return check_match(([120, 340], [98, 104, 124]),    # 弹出框灰框
@@ -119,9 +119,10 @@ ui = UI()
 CY = 850  # card y
 CARD = ((170, CY), (270, CY), (370, CY), (470, CY))  # 卡片坐标
 AXIS = {'左': 125, '右': 405, '上': 200, '下': 720}
+AXIS = {'左': 190, '右': 340, '上': 200, '下': 200}  # 城堡 覆盖两座
 
 
-def random_play(power_empty=True, degrade=0, method=2):
+def random_play(power_empty=True, degrade=0, method=1):
     card_index = random.randint(0, 3)
     if method == 1:
         x = random.choice(('左', '右'))
